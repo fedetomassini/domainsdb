@@ -1,6 +1,11 @@
 {
   "name": "domainsdb",
-  "version": "0.1.0",
+  "version": "0.0.9",
+  "author": {
+    "name": "Federico Tomassini",
+    "email": "fedetomassini.dev@gmail.com",
+    "url": "https://github.com/fedetomassini"
+  },
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,6 +14,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.18",
     "lucide-react": "^0.344.0",
     "next": "14.1.1",
     "react": "^18",
