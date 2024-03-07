@@ -1,4 +1,4 @@
-import { Database, CopyrightIcon } from 'lucide-react';
+import { Database, GithubIcon, LinkedinIcon, Mail } from 'lucide-react';
 import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 
@@ -44,18 +44,16 @@ export default function Info({ isOpen, onClose }: { isOpen: boolean; onClose: ()
                                     >
                                         <Database size={22} />
                                     </Dialog.Title>
-                                    <div className="mt-4">
+                                    <div className="mt-4 space-y-4">
                                         <p className='italic'>
                                             This website meticulously scans lists of registered domains, identifying names that include specific words, phrases, numbers, or symbols. Discover the perfect domain for your needs with our user-friendly and precise search feature.
                                         </p>
-                                        <div className='inline-flex text-[13px] align-middle space-x-1 mt-4 items-center'>
-                                            <CopyrightIcon size={14} color='rgb(156 163 175)' />
-                                            <p className="text-gray-400 mt-1">
-                                                Made by
-                                                <a href='https://github.com/fedetomassini' target='_blank' className='ml-1 underline underline-offset-[5px] decoration-dashed hover:underline-offset-[8px] hover:text-red-400 transition-all delay-75 ease-in-out'>@fedetomassini</a>
-                                            </p>
+                                        <p>The database from which the information is obtained contains more than 260 million registered domains and more than 1,000 TLDS, including newGTLDs.</p>
+                                        <div className='inline-flex align-middle space-x-2.5 items-center'>
+                                            <a href='https://github.com/fedetomassini' target='_blank'><GithubIcon size={22} color='rgb(156 163 175)'/></a>
+                                            <a href='https://www.linkedin.com/in/fedetomassini' target='_blank'><LinkedinIcon size={22} color='rgb(156 163 175)'/></a>
+                                            <a href='malto:fedetomassini.dev@gmail.com' target='_blank'><Mail size={22} color='rgb(156 163 175)' /></a>
                                         </div>
-
                                     </div>
 
                                     <div className="float-right -mt-4">

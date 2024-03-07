@@ -25,12 +25,16 @@ export default function Home() {
 	};
 
 
-	
-	const handleKeyPress = async (e: any) => {
-		if (e.key === 'Enter') {
-			e.preventDefault();
+
+	const handleKeyPress = async (event: React.KeyboardEvent) => {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			if (searchTerm.trim() === '') {
+				return;
+			}
 			setSearchTerm('');
 			setIsLoading(true);
+
 			try {
 				const results = await searchDomains(searchTerm);
 				if (results) {
@@ -42,10 +46,14 @@ export default function Home() {
 		}
 	};
 
-	const handleButtonPress = async (e: any) => {
-		e.preventDefault();
+	const handleButtonPress = async (event: React.MouseEvent) => {
+		event.preventDefault();
+		if (searchTerm.trim() === '') {
+			return;
+		}
 		setSearchTerm('');
 		setIsLoading(true);
+
 		try {
 			const results = await searchDomains(searchTerm);
 			if (results) {
@@ -90,6 +98,7 @@ export default function Home() {
 						autoComplete="off"
 						autoFocus={true}
 						autoCorrect="off"
+						placeholder='Search a domain...'
 						className="w-[315px] max-sm:w-[225px] py-1.5 px-2 text-[#7077A1] bg-[#2D3250] font-bold placeholder:font-bold border-l-2 border-y-2 border-[#424769] rounded-tl-md rounded-bl-md focus:outline-none focus:text-[#7077A1]"
 						onKeyDown={handleKeyPress}
 						value={searchTerm}
@@ -106,7 +115,7 @@ export default function Home() {
 					<Loading />
 				) : (
 					searchResults.length > 0 && (
-						<div id="results" className='grid pb-5 px-5 overflow-x-auto'>
+						<div id="results" className='grid pb-5 px-5 max-sm:px-3 max-sm:overflow-x-auto max-sm:w-[310px]'>
 							<table className="w-fit h-fit bg-[#2D3250] rounded-md">
 								<thead className="text-center">
 									<tr>
