@@ -5,8 +5,8 @@ import { useState, useCallback } from "react";
 import type { SearchResult } from "./lib/definitions";
 import { searchDomains } from "@/app/lib/data";
 
-import Info from "@/components/info";
-import Loading from "@/app/loading";
+import Info from "../components/info";
+import Loading from "./loading";
 
 export default function Home() {
 	const [searchTerm, setSearchTerm] = useState("");
