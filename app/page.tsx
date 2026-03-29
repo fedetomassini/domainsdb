@@ -1,143 +1,187 @@
-"use client"
-import { Database, BadgeInfo } from 'lucide-react';
-import { useState } from 'react';
-import type { SearchResult } from './lib/definitions';
-import { searchDomains } from '@/app/lib/data';
-// Components \\
-import Info from '@/components/Info';
-import Loading from './loading';
+"use client";
 
+import { Database, BadgeInfo, Search } from "lucide-react";
+import { useState, useCallback } from "react";
+import type { SearchResult } from "./lib/definitions";
+import { searchDomains } from "@/app/lib/data";
 
+import Info from "@/components/info";
+import Loading from "@/app/loading";
 
 export default function Home() {
+	const [searchTerm, setSearchTerm] = useState("");
+	const [results, setResults] = useState<SearchResult[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [showInfo, setShowInfo] = useState(false);
 
-	const [searchTerm, setSearchTerm] = useState('');
-	const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [isInfoVisible, setIsInfoVisible] = useState(false);
-
-	const toggleInfoVisibility = () => {
-		setIsInfoVisible((prev) => !prev);
+	const formatDate = (date?: string) => {
+		if (!date) return "-";
+		return new Date(date).toLocaleString("en-GB", {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+		});
 	};
 
-	const handleCloseInfo = () => {
-		setIsInfoVisible(false);
-	};
+	const handleSearch = useCallback(async () => {
+		const query = searchTerm.trim();
+		if (!query) return;
 
-
-
-	const handleKeyPress = async (event: React.KeyboardEvent) => {
-		if (event.key === 'Enter') {
-			event.preventDefault();
-			if (searchTerm.trim() === '') {
-				return;
-			}
-			setSearchTerm('');
-			setIsLoading(true);
-
-			try {
-				const results = await searchDomains(searchTerm);
-				if (results) {
-					setSearchResults(results);
-				}
-			} finally {
-				setIsLoading(false);
-			}
-		}
-	};
-
-	const handleButtonPress = async (event: React.MouseEvent) => {
-		event.preventDefault();
-		if (searchTerm.trim() === '') {
-			return;
-		}
-		setSearchTerm('');
-		setIsLoading(true);
+		setLoading(true);
+		setError(null);
+		setResults([]);
 
 		try {
-			const results = await searchDomains(searchTerm);
-			if (results) {
-				setSearchResults(results);
-			}
+			const data = await searchDomains(query);
+			setResults(data || []);
+		} catch {
+			setError("Failed to fetch results.");
 		} finally {
-			setIsLoading(false);
+			setLoading(false);
+			setSearchTerm("");
 		}
-	};
-
-
+	}, [searchTerm]);
 
 	return (
-		<section className="flex flex-col items-center mx-auto justify-center mt-16">
-			<div>
+		<section className="relative flex flex-col items-center min-h-screen px-4 py-20">
+			{/* Background glow */}
+			<div className="absolute top-0 w-[500px] h-[500px] bg-[#7077A1]/20 blur-3xl rounded-full -z-10" />
 
-			</div>
-			<div className="flex flex-col justify-center place-items-center space-y-5">
-				<h1 className="inline-flex gap-2 text-4xl font-bold items-center">
-					<Database size={36} /> DomainsDB <Database size={36} />
-				</h1>
-				<div className="text-center w-[750px] px-20 max-md:max-w-[300px] max-md:px-4">
-					Registered domains search checks the lists of registered domains for names containing particular words/phrases/numbers or symbols
-				</div>
-				<div className='absolute top-0 right-5 flex flex-col space-y-10 z-20'>
+			<div className="w-full max-w-3xl flex flex-col gap-8">
+				{/* Header */}
+				<div className="text-center space-y-3 relative">
+					<div className="flex justify-center">
+						<div className="p-3 rounded-xl bg-[#7077A1]/20">
+							<Database className="text-[#AAB2FF]" size={32} />
+						</div>
+					</div>
+
+					<h1 className="text-3xl md:text-4xl font-bold text-white">
+						DomainsDB
+					</h1>
+
+					<p className="text-gray-400 max-w-md mx-auto text-sm md:text-base">
+						Search across millions of registered domains using keywords,
+						patterns, or phrases.
+					</p>
+
 					<button
-						className='hover:text-[#7077A1] absolute top-0 right-0'
-						onClick={toggleInfoVisibility}
+						type="button"
+						onClick={() => setShowInfo(true)}
+						className="absolute top-0 right-0 text-gray-500 hover:text-white transition"
 					>
-						<BadgeInfo size={26} />
+						<BadgeInfo size={22} />
 					</button>
-					<Info isOpen={isInfoVisible} onClose={handleCloseInfo} />
 				</div>
 
-				<div id="input">
+				<Info isOpen={showInfo} onClose={() => setShowInfo(false)} />
+
+				{/* Search */}
+				<div className="flex w-full max-w-lg mx-auto group">
 					<input
-						min={1}
-						max={253}
-						minLength={1}
-						maxLength={253}
-						autoCapitalize="off"
-						autoComplete="off"
-						autoFocus={true}
-						autoCorrect="off"
-						placeholder='Search a domain...'
-						className="w-[315px] max-sm:w-[225px] py-1.5 px-2 text-[#7077A1] bg-[#2D3250] font-bold placeholder:font-bold border-l-2 border-y-2 border-[#424769] rounded-tl-md rounded-bl-md focus:outline-none focus:text-[#7077A1]"
-						onKeyDown={handleKeyPress}
 						value={searchTerm}
 						onChange={(e) => setSearchTerm(e.target.value)}
+						onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+						placeholder="Search domains (e.g. google, shop, ai...)"
+						disabled={loading}
+						className="
+							flex-1 px-4 py-3
+							bg-[#2D3250]/80
+							border border-[#424769]
+							rounded-l-xl
+							text-gray-200
+							placeholder-gray-500
+							focus:outline-none
+							focus:ring-2 focus:ring-[#7077A1]/50
+							transition
+						"
 					/>
+
 					<button
-						className="py-1.5 px-4 bg-[#2D3250] border-2 border-[#424769] rounded-tr-md rounded-br-md focus:outline-none font-bold hover:text-red-400 active:text-[#7077A1]"
-						onClick={handleButtonPress}
+						type="button"
+						onClick={handleSearch}
+						disabled={loading || !searchTerm.trim()}
+						className="
+							flex items-center gap-2 px-5
+							bg-[#7077A1]
+							text-white
+							font-medium
+							rounded-r-xl
+							hover:bg-[#8a90c7]
+							active:scale-95
+							disabled:opacity-50
+							transition
+						"
 					>
-						Find
+						<Search size={16} />
+						Search
 					</button>
 				</div>
-				{isLoading ? (
-					<Loading />
-				) : (
-					searchResults.length > 0 && (
-						<div id="results" className='grid pb-5 px-5 max-sm:px-3 max-sm:overflow-x-auto max-sm:w-[310px]'>
-							<table className="w-fit h-fit bg-[#2D3250] rounded-md">
-								<thead className="text-center">
-									<tr>
-										<th className="py-1 px-4 border-2 border-[#424769]">Domain</th>
-										<th className="py-1 px-4 border-2 border-[#424769]">Created</th>
-										<th className="py-1 px-4 border-2 border-[#424769]">Updated</th>
-										<th className="py-1 px-4 border-2 border-[#424769]">Country</th>
+
+				{/* States */}
+				<div className="flex justify-center min-h-[40px]">
+					{loading && <Loading />}
+
+					{error && <p className="text-red-400 text-sm">{error}</p>}
+
+					{!loading && !error && results.length === 0 && (
+						<p className="text-gray-500 text-sm">
+							No results yet. Try searching something.
+						</p>
+					)}
+				</div>
+
+				{/* Results */}
+				{results.length > 0 && (
+					<div
+						className="
+						bg-[#2D3250]/80
+						border border-[#424769]
+						rounded-xl
+						overflow-hidden
+						shadow-lg
+					"
+					>
+						<table className="w-full text-sm">
+							<thead className="bg-[#252a45] text-gray-300">
+								<tr>
+									<th className="py-3 px-4 text-left">Domain</th>
+									<th className="py-3 px-4 text-left">Created</th>
+									<th className="py-3 px-4 text-left">Updated</th>
+									<th className="py-3 px-4 text-left">Country</th>
+								</tr>
+							</thead>
+
+							<tbody>
+								{results.map((r) => (
+									<tr
+										key={r.domain}
+										className="
+											border-t border-[#424769]
+											hover:bg-[#3a3f63]/60
+											transition
+										"
+									>
+										<td className="py-3 px-4 font-medium text-white">
+											{r.domain}
+										</td>
+										<td className="py-3 px-4 text-gray-300">
+											{formatDate(r.create_date)}
+										</td>
+										<td className="py-3 px-4 text-gray-300">
+											{formatDate(r.update_date)}
+										</td>
+										<td className="py-3 px-4 text-gray-400">
+											{r.country || "-"}
+										</td>
 									</tr>
-								</thead>
-								<tbody className="text-center not-italic border-2 border-[#424769]">
-									{searchResults.map((result: any) => (
-										<tr key={result.domain}>
-											<td className="py-1 px-4 border-2 border-[#424769]">{result.domain}</td>
-											<td className="py-1 px-4 border-2 border-[#424769]">{new Date(result.create_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric' })}</td>
-											<td className="py-1 px-4 border-2 border-[#424769]">{new Date(result.update_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric' })}</td>
-											<td className="py-1 px-4 border-2 border-[#424769]">{result.country || '?'}</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
-					)
+								))}
+							</tbody>
+						</table>
+					</div>
 				)}
 			</div>
 		</section>
